@@ -1,0 +1,529 @@
+@startuml
+
+package "Common" {
+class K8sSpec{
+apiVersion
+kind
+metadata
+}
+
+class K8sObject{
+name: string
+namespace: string
+status
+spec: Class
+}
+}
+
+
+package "Core" {
+
+
+class Node{
+name: string
+labels: Map<String,String>
+taints: Taint[]
+}
+
+class Namespace{}
+
+class Pod{
+containers: Class<Container>[]
+initContainers: Class<Container>[]
+volumes: Volume[]
+securityContext: PodSecurityContext
+serviceAccountName: string
+tolerations: Toleration[]
+nodeSelector: Map<String,String>
+affinity: Affinity
+}
+Pod --> RestartPolicy: restartPolicy
+enum RestartPolicy{
+    Always *
+    OnFailure
+    Never
+}
+
+class ReplicaSet{
+selector: LabelSelector
+template: Class<Pod>
+replicas: integer
+}
+
+class Deployment{
+selector: LabelSelector
+template: Class<Pod>
+replicas: integer
+}
+
+Deployment o--> "1" ReplicaSet
+Deployment --> "*" RolloutRevision
+RolloutRevision --> ReplicaSet
+ReplicaSet o--> "*" Pod
+Pod --> "1..*" Node : deployed on
+Pod o--> "*" Container
+
+Deployment --> DeploymentStrategy: strategy
+class DeploymentStrategy{
+
+}
+DeploymentStrategy --> DeploymentStrategyType: type
+DeploymentStrategy --> RollingUpdateDeployment: rollingUpdate
+note on link: if type corresponds
+
+enum DeploymentStrategyType{
+    RollingUdate
+    Recreate
+}
+class RollingUpdateDeployment{
+    maxSurge: integer
+    maxUnavailable: integer
+}
+
+class RolloutRevision {
+nb: integer
+change-cause: string
+}
+note bottom: read-only, for history and rollback only
+
+
+class Container{
+name: string
+image: string
+command: string[]
+args: string[]
+volumeMounts: VolumeMount[]
+resources: ResourceRequirements
+readinessProbe: Probe
+livenessProbe: Probe
+securityContext: SecurityContext
+}
+
+Container -->"*" ContainerPort: ports
+Container --> ImagePullPolicy: imagePullPolicy
+
+class ContainerPort{
+    containerPort: integer
+}
+
+class EnvVar{
+    name: string
+    value: string
+}
+Container -->"*" EnvVar : env
+class EnvVarSource{
+}
+EnvVar --> EnvVarSource: valueFrom
+EnvVarSource --> KeyRef: configMapKeyRef
+EnvVarSource --> KeyRef: secretKeyRef
+EnvVarSource --> ObjectFieldSelector: fieldRef
+class KeyRef{
+    key: string
+    name: string
+    optional: boolean
+}
+class ObjectFieldSelector{
+    fieldPath: string    
+}
+
+class EnvFromSource{
+
+}
+Container -->"*" EnvFromSource: envFrom
+EnvFromSource --> EnvSource: configMapRef
+EnvFromSource --> EnvSource: secretRef
+
+class EnvSource{
+    name: string
+    optional: bollean
+}
+
+enum ImagePullPolicy{
+    Always
+    Never
+    IfNotPresent
+}
+
+}
+
+package "Config" {
+
+class ConfigMap{
+data: Map<String,String>
+}
+class Secret{
+data: Map<String,String>
+}
+
+}
+
+package "Authentication,  Authorizations" {
+
+class PodSecurityContext{
+runAsUser: string
+}
+class SecurityContext{
+runAsUser: string
+capabilities: string[]
+}
+
+
+class Role{
+
+}
+class PolicyRule{
+apiGroups: string[]
+resources: string[]
+verbs: string[]
+resourceNames: string[]
+}
+Role --> "*" PolicyRule: rules
+RoleBinding --> "*" Subject: subjects
+RoleBinding --> RoleRef: roleRef
+class RoleBinding{}
+class RoleRef{
+kind: User, Group, Role
+name
+apiGroup
+}
+class Subject{
+    namespace: string
+}
+Subject --|> RoleRef
+
+class User{}
+class Group{}
+
+class ServiceAccount{
+secrets: Object[]
+}
+
+class CertificateSigningRequest{
+groups: string[]
+usages: string[]
+request: string
+}
+}
+
+package "Resources" {
+
+class ResourceRequirements{}
+
+class ResourceDescription{
+memory: string
+cpu: string
+}
+
+ResourceRequirements --> "*" ResourceDescription: limits
+ResourceRequirements --> "*" ResourceDescription: requests
+
+}
+
+package "Selection & Affinity" {
+
+class Taint{
+key: string
+value: string
+}
+
+enum TaintEffect{
+NoSchedule
+PreferNoSchedule
+NoExecute
+}
+
+Taint --> TaintEffect: effect
+
+
+
+class MatchExpression{
+key: string
+value: string
+operator: Operator
+}
+
+class Toleration {}
+Toleration --> TaintEffect: effect
+
+
+MatchExpression <|-- Toleration
+
+class Affinity{}
+class NodeAffinity{}
+
+Affinity --> NodeAffinity: nodeAffinity
+
+NodeAffinity --> NodeSelectorTerms: requiredDuringSchedulingIgnoredDuringExecution
+NodeAffinity --> NodeSelectorTerms: preferredDuringSchedulingIgnoredDuringExecution
+
+class NodeSelectorTerms{
+matchExpressions: MatchExpression[][]
+}
+
+class LabelSelector{
+matchLabels: Map<string,string>
+}
+}
+
+
+package "Probes" {
+Probe --> HttpGetAction: httpGet
+class Probe{
+initialDelaySeconds: integer
+periodSeconds: integer
+failureTheshold: integer
+}
+class HttpGetAction{
+path: string
+port: integer
+}
+
+}
+
+package "Jobs" {
+
+
+class Job{
+template: Class<Pod>
+completions: integer
+parallelism: integer
+backoffLimit: integer
+}
+
+class CronJob{
+schedule: string
+jobTemplate: Class<Job>
+}
+
+CronJob o--> "*" Job
+
+}
+
+package "Services" {
+
+class Service{
+selector: Map<string,string>
+}
+
+enum ServiceType{
+ClusterIP
+NodePort
+LoadBalancer
+}
+Service --> ServiceType: type
+
+
+class ClusterIPService{
+ports: ServicePort[]
+}
+ClusterIPService --|> Service
+
+class NodePortService{
+
+}
+NodePortService --> "1" ClusterIPService
+NodePortService --|> Service
+
+class LoadBalancerService{
+
+}
+LoadBalancerService --> "1" NodePortService
+LoadBalancerService --|> Service
+
+class ServicePort{
+targetPort: integer
+port: integer
+}
+class NodeServicePort{
+nodePort: integer
+}
+NodeServicePort --|> ServicePort
+
+ClusterIPService -->"*" ServicePort: ports
+NodePortService -->"*" NodeServicePort: ports
+
+}
+
+package "Ingress" {
+
+
+class Ingress{}
+class IngressBackend{
+name: string
+port: PortNumber
+}
+Ingress --> IngressBackend: defaultBackend
+
+enum IngressPathType{
+Prefix
+Exact
+ImplementationSpecific
+}
+
+
+class IngressRule{
+host: string [0..1]
+}
+Ingress ---> "*" IngressRule: rules
+
+class HTTPIngressRuleValue{
+path: string
+}
+IngressRule --> "*" HTTPIngressRuleValue: http
+HTTPIngressRuleValue --> "1" IngressBackend: backend
+HTTPIngressRuleValue --> IngressPathType: pathType
+}
+
+package "NetworkPolicies" {
+
+
+class NetworkPolicy{
+    podSelector: LabelSelector
+}
+NetworkPolicy --> "*" NetworkPolicyIngressRule: ingress
+NetworkPolicy --> "*" NetworkPolicyEgressRule: egress
+
+NetworkPolicy --> "*" NetworkPolicyType: policyTypes
+
+enum NetworkPolicyType{
+Ingress
+Egress
+}
+
+
+class NetworkPolicyIngressRule{
+ports: NetworkPolicyPort[]
+}
+class NetworkPolicyEgressRule{
+ports: NetworkPolicyPort[]
+}
+
+NetworkPolicyIngressRule -->"*" NetworkPolicyPeer: from
+NetworkPolicyEgressRule -->"*" NetworkPolicyPeer: to
+
+class NetworkPolicyPeer{
+podSelector: LabelSelector
+namespaceSelector: Selector
+}
+
+class NetworkPolicyPort{
+    port: integer
+    protocol: string
+}
+}
+
+package "Volumes" {
+
+class Volume{
+name
+... depends on volume type
+}
+
+class VolumeMount{
+name: string
+mountPath: string
+subPath: string
+}
+VolumeMount -->"1" Volume
+
+PersistentVolume -->"*" AccessMode: accessModes
+PersistentVolume --> PVReclaimPolicy: persistentVolumeReclaimPolicy
+class PersistentVolume{
+... depends on PV type
+}
+enum AccessMode{
+ReadWriteOnce
+ReadWriteMany
+ReadOnlyMany
+}
+
+class Capacity{
+storage: MemoryType
+}
+enum PVReclaimPolicy{
+Retain
+Delete
+Recycle
+}
+
+PersistentVolume -- PersistentVolumeClaim: mapped 1-1
+class PersistentVolumeClaim{
+accessModes: AccessMode[]
+resources: Resources
+storageClassName: string
+}
+
+PersistentVolume --> Capacity: capacity
+
+
+class StorageClass{
+provisioner: string
+parameters: Object[]
+}
+StorageClass --> PersistentVolume
+note on link
+    creates 1 for each pod/deployment using a PVC
+end note
+}
+
+package "StatefulSet" {
+
+class StatefulSet{
+serviceName: string
+volumeClaimTemplate: Class<PersistentVolumeClaim>
+}
+enum PodManagementPolicy{
+OrderedReady
+Parallel
+}
+StatefulSet --> PodManagementPolicy: podManagementPolicy
+
+}
+
+package "CLI" {
+
+class KubeConfig{}
+
+class Context{
+name: string
+namespace: string
+}
+
+
+class ConfigUser{
+name
+}
+
+class ConfigUserDef{
+client-certificate
+client-key
+}
+
+
+class ConfigCluster{
+name
+}
+
+class ConfigClusterDef{
+server: string
+certificate-authority: string
+certificate-authority-data: string
+}
+note bottom
+    Either certificate-authority (path) 
+    or certificate-authority-data (base64)
+end note
+
+KubeConfig -->"*" Context: contexts
+KubeConfig -->"*" ConfigCluster: clusters
+KubeConfig -->"*" ConfigUser: users
+
+Context --> ConfigUser: user
+Context --> ConfigCluster: cluster
+ConfigCluster --> ConfigClusterDef: cluster
+
+ConfigUser --> ConfigUserDef: user
+}
+
+@enduml
+
