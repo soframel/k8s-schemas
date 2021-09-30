@@ -1,6 +1,21 @@
 @startuml
+' page 1x4
 
-package "Common" {
+' trying to separate into different pages
+Core --> Common
+Core --> Config
+Core --> Resources
+Core --> Volumes
+Core --> "Selection & Affinity"
+Core --> Probes
+Jobs --> Core
+Core --> "Authentication & Authorizations"
+Services --> Core
+"External Access" --> Services
+"Network Policies" --> "External Access"
+CLI --> "Authentication & Authorizations"
+
+package "Common" #dfe0d0 {
 class K8sSpec{
 apiVersion
 kind
@@ -15,8 +30,7 @@ spec: Class
 }
 }
 
-
-package "Core" {
+package "Core" #f7e58c {
 
 
 class Node{
@@ -144,9 +158,19 @@ enum ImagePullPolicy{
     IfNotPresent
 }
 
+class StatefulSet{
+serviceName: string
+volumeClaimTemplate: Class<PersistentVolumeClaim>
+}
+enum PodManagementPolicy{
+OrderedReady
+Parallel
+}
+StatefulSet --> PodManagementPolicy: podManagementPolicy
+
 }
 
-package "Config" {
+package "Config" #d3f78c {
 
 class ConfigMap{
 data: Map<String,String>
@@ -157,7 +181,7 @@ data: Map<String,String>
 
 }
 
-package "Authentication,  Authorizations" {
+package "Authentication & Authorizations" #f7b08c{
 
 class PodSecurityContext{
 runAsUser: string
@@ -205,7 +229,7 @@ request: string
 }
 }
 
-package "Resources" {
+package "Resources" #b6c1ed {
 
 class ResourceRequirements{}
 
@@ -219,7 +243,8 @@ ResourceRequirements --> "*" ResourceDescription: requests
 
 }
 
-package "Selection & Affinity" {
+
+package "Selection & Affinity" #daedb6{
 
 class Taint{
 key: string
@@ -272,7 +297,7 @@ LabelSelector --> LabelSelectorRequirement: matchExpressions
 }
 
 
-package "Probes" {
+package "Probes" #edb6c0 {
 Probe --> HttpGetAction: httpGet
 class Probe{
 initialDelaySeconds: integer
@@ -286,7 +311,8 @@ port: integer
 
 }
 
-package "Jobs" {
+
+package "Jobs" #b6dced {
 
 
 class Job{
@@ -305,7 +331,9 @@ CronJob o--> "*" Job
 
 }
 
-package "Services" {
+
+
+package "Services" #b6bfed {
 
 abstract class Service{
 selector: Map<string,string>
@@ -348,7 +376,8 @@ Service -->"*" ServicePort: ports
 
 }
 
-package "Ingress" {
+
+package "External Access" #e5f287 {
 
 
 class Ingress{}
@@ -378,7 +407,8 @@ HTTPIngressRuleValue --> "1" IngressBackend: backend
 HTTPIngressRuleValue --> IngressPathType: pathType
 }
 
-package "NetworkPolicies" {
+
+package "Network Policies" #edb6e9{
 
 
 class NetworkPolicy{
@@ -416,7 +446,8 @@ class NetworkPolicyPort{
 }
 }
 
-package "Volumes" {
+
+package "Volumes" #c8b6ed {
 
 class Volume{
 name
@@ -470,23 +501,13 @@ note on link
 end note
 }
 
-package "StatefulSet" {
 
-class StatefulSet{
-serviceName: string
-volumeClaimTemplate: Class<PersistentVolumeClaim>
-}
-enum PodManagementPolicy{
-OrderedReady
-Parallel
-}
-StatefulSet --> PodManagementPolicy: podManagementPolicy
+
+package "CLI" #8ba4ed{
+
+class KubeConfig{
 
 }
-
-package "CLI" {
-
-class KubeConfig{}
 
 class Context{
 name: string
