@@ -235,18 +235,13 @@ NoExecute
 Taint --> TaintEffect: effect
 
 
-
-class MatchExpression{
+class Toleration {
 key: string
 value: string
 operator: Operator
 }
-
-class Toleration {}
 Toleration --> TaintEffect: effect
 
-
-MatchExpression <|-- Toleration
 
 class Affinity{}
 class NodeAffinity{}
@@ -256,13 +251,24 @@ Affinity --> NodeAffinity: nodeAffinity
 NodeAffinity --> NodeSelectorTerms: requiredDuringSchedulingIgnoredDuringExecution
 NodeAffinity --> NodeSelectorTerms: preferredDuringSchedulingIgnoredDuringExecution
 
-class NodeSelectorTerms{
-matchExpressions: MatchExpression[][]
+class PodAffinityTerm{
+topologyKey: string
+labelSelector: LabelSelector
+namespaceSelector: LabelSelector
 }
 
 class LabelSelector{
 matchLabels: Map<string,string>
+matchExpressions: 
 }
+
+class LabelSelectorRequirement{
+key: string
+operator: string
+values: string[]
+}
+LabelSelector --> LabelSelectorRequirement: matchExpressions
+
 }
 
 
