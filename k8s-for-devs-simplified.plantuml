@@ -307,7 +307,7 @@ CronJob o--> "*" Job
 
 package "Services" {
 
-class Service{
+abstract class Service{
 selector: Map<string,string>
 }
 
@@ -320,7 +320,6 @@ Service --> ServiceType: type
 
 
 class ClusterIPService{
-ports: ServicePort[]
 }
 ClusterIPService --|> Service
 
@@ -339,14 +338,13 @@ LoadBalancerService --|> Service
 class ServicePort{
 targetPort: integer
 port: integer
-}
-class NodeServicePort{
 nodePort: integer
 }
-NodeServicePort --|> ServicePort
+note right of ServicePort::nodePort
+    only if type NodePort
+end note
 
-ClusterIPService -->"*" ServicePort: ports
-NodePortService -->"*" NodeServicePort: ports
+Service -->"*" ServicePort: ports
 
 }
 
