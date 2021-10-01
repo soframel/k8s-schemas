@@ -1,7 +1,5 @@
 @startuml
-' page 1x4
 
-' trying to separate into different pages
 Core --> Common
 Core --> Config
 Core --> Resources
@@ -39,9 +37,9 @@ labels: Map<String,String>
 taints: Taint[]
 }
 
-class Namespace [[https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/namespace-v1/]]{}
+class Namespace [[https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/namespace-v1/]] {}
 
-class Pod [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/]]{
+class Pod [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/]] {
 containers: Class<Container>[]
 initContainers: Class<Container>[]
 volumes: Volume[]
@@ -58,13 +56,13 @@ enum RestartPolicy{
     Never
 }
 
-class ReplicaSet [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/replica-set-v1/]]{
+class ReplicaSet [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/replica-set-v1/]] {
 selector: LabelSelector
 template: Class<Pod>
 replicas: integer
 }
 
-class Deployment [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/deployment-v1/]]{
+class Deployment [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/deployment-v1/]] {
 selector: LabelSelector
 template: Class<Pod>
 replicas: integer
@@ -101,7 +99,7 @@ change-cause: string
 note bottom: read-only, for history and rollback only
 
 
-class Container [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container]]{
+class Container [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container]] {
 name: string
 image: string
 command: string[]
@@ -158,7 +156,7 @@ enum ImagePullPolicy{
     IfNotPresent
 }
 
-class StatefulSet [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/stateful-set-v1/]]{
+class StatefulSet [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/stateful-set-v1/]] {
 serviceName: string
 volumeClaimTemplate: Class<PersistentVolumeClaim>
 }
@@ -192,7 +190,7 @@ capabilities: string[]
 }
 
 
-class Role [[https://kubernetes.io/docs/reference/kubernetes-api/authorization-resources/role-v1/]]{
+class Role [[https://kubernetes.io/docs/reference/kubernetes-api/authorization-resources/role-v1/]] {
 
 }
 class PolicyRule{
