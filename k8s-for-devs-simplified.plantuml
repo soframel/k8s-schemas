@@ -33,15 +33,15 @@ spec: Class
 package "Core" #f7e58c {
 
 
-class Node{
+class Node [[https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/node-v1/]] {
 name: string
 labels: Map<String,String>
 taints: Taint[]
 }
 
-class Namespace{}
+class Namespace [[https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/namespace-v1/]]{}
 
-class Pod{
+class Pod [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/]]{
 containers: Class<Container>[]
 initContainers: Class<Container>[]
 volumes: Volume[]
@@ -58,13 +58,13 @@ enum RestartPolicy{
     Never
 }
 
-class ReplicaSet{
+class ReplicaSet [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/replica-set-v1/]]{
 selector: LabelSelector
 template: Class<Pod>
 replicas: integer
 }
 
-class Deployment{
+class Deployment [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/deployment-v1/]]{
 selector: LabelSelector
 template: Class<Pod>
 replicas: integer
@@ -101,7 +101,7 @@ change-cause: string
 note bottom: read-only, for history and rollback only
 
 
-class Container{
+class Container [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container]]{
 name: string
 image: string
 command: string[]
@@ -158,7 +158,7 @@ enum ImagePullPolicy{
     IfNotPresent
 }
 
-class StatefulSet{
+class StatefulSet [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/stateful-set-v1/]]{
 serviceName: string
 volumeClaimTemplate: Class<PersistentVolumeClaim>
 }
@@ -172,10 +172,10 @@ StatefulSet --> PodManagementPolicy: podManagementPolicy
 
 package "Config" #d3f78c {
 
-class ConfigMap{
+class ConfigMap [[https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/config-map-v1/]] {
 data: Map<String,String>
 }
-class Secret{
+class Secret [[https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/secret-v1/]] {
 data: Map<String,String>
 }
 
@@ -192,7 +192,7 @@ capabilities: string[]
 }
 
 
-class Role{
+class Role [[https://kubernetes.io/docs/reference/kubernetes-api/authorization-resources/role-v1/]]{
 
 }
 class PolicyRule{
@@ -204,7 +204,7 @@ resourceNames: string[]
 Role --> "*" PolicyRule: rules
 RoleBinding --> "*" Subject: subjects
 RoleBinding --> RoleRef: roleRef
-class RoleBinding{}
+class RoleBinding [[https://kubernetes.io/docs/reference/kubernetes-api/authorization-resources/role-binding-v1/]] {}
 class RoleRef{
 kind: User, Group, Role
 name
@@ -218,11 +218,11 @@ Subject --|> RoleRef
 class User{}
 class Group{}
 
-class ServiceAccount{
+class ServiceAccount [[https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/service-account-v1/]] {
 secrets: Object[]
 }
 
-class CertificateSigningRequest{
+class CertificateSigningRequest [[https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/certificate-signing-request-v1/]] {
 groups: string[]
 usages: string[]
 request: string
@@ -315,14 +315,14 @@ port: integer
 package "Jobs" #b6dced {
 
 
-class Job{
+class Job [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/job-v1/]] {
 template: Class<Pod>
 completions: integer
 parallelism: integer
 backoffLimit: integer
 }
 
-class CronJob{
+class CronJob [[https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/cron-job-v1/]] {
 schedule: string
 jobTemplate: Class<Job>
 }
@@ -335,7 +335,7 @@ CronJob o--> "*" Job
 
 package "Services" #b6bfed {
 
-abstract class Service{
+abstract class Service [[https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/]] {
 selector: Map<string,string>
 }
 
@@ -380,7 +380,7 @@ Service -->"*" ServicePort: ports
 package "External Access" #e5f287 {
 
 
-class Ingress{}
+class Ingress [[https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/]] {}
 class IngressBackend{
 name: string
 port: PortNumber
@@ -411,7 +411,7 @@ HTTPIngressRuleValue --> IngressPathType: pathType
 package "Network Policies" #edb6e9{
 
 
-class NetworkPolicy{
+class NetworkPolicy [[https://kubernetes.io/docs/reference/kubernetes-api/policy-resources/network-policy-v1/]] {
     podSelector: LabelSelector
 }
 NetworkPolicy --> "*" NetworkPolicyIngressRule: ingress
@@ -449,7 +449,7 @@ class NetworkPolicyPort{
 
 package "Volumes" #c8b6ed {
 
-class Volume{
+class Volume [[https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/volume/]] {
 name
 ... depends on volume type
 }
@@ -463,7 +463,7 @@ VolumeMount -->"1" Volume
 
 PersistentVolume -->"*" AccessMode: accessModes
 PersistentVolume --> PVReclaimPolicy: persistentVolumeReclaimPolicy
-class PersistentVolume{
+class PersistentVolume [[https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-v1/]] {
 ... depends on PV type
 }
 enum AccessMode{
@@ -482,7 +482,7 @@ Recycle
 }
 
 PersistentVolume -- PersistentVolumeClaim: mapped 1-1
-class PersistentVolumeClaim{
+class PersistentVolumeClaim [[https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/]] {
 accessModes: AccessMode[]
 resources: Resources
 storageClassName: string
@@ -491,7 +491,7 @@ storageClassName: string
 PersistentVolume --> Capacity: capacity
 
 
-class StorageClass{
+class StorageClass [[https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/storage-class-v1/]] {
 provisioner: string
 parameters: Object[]
 }

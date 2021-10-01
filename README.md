@@ -14,5 +14,5 @@ Finally, it mixes the concepts of specifications and objects: specifications are
 
 To generate image: 
 ```bash
-java -jar <path-to-plantuml> k8s-for-devs-simplified.plantuml.puml
+java DPLANTUML_LIMIT_SIZE=8000 -jar -jar <path-to-plantuml> k8s-for-devs-simplified.plantuml.puml -tsvg
 ```
