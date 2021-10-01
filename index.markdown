@@ -15,4 +15,4 @@ In addition, it sometimes contains some adaptations for a better readability, li
 
 Finally, it mixes the concepts of specifications and objects: specifications are reproduced as class attributes directly on the same class representing the runtime objects. Note that main concept classes inherit the K8SObject class.
 
-[K8s For Devs Simplified Class Diagram](./k8s-for-devs-simplified.svg).
+[K8s For Devs Simplified Class Diagram](k8s-for-devs-simplified.svg).
