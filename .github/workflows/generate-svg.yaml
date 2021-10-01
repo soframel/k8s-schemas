@@ -8,6 +8,7 @@ jobs:
       - uses: lokkju/github-action-plantuml@master
         with:          
           args: "k8s-for-devs-simplified.plantuml -tsvg"
+          PLANTUML_VERSION: "1.2021.10"
       - name: Upload svg file
         uses: actions/upload-artifact@v2
         with:
