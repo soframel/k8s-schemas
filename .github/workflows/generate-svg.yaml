@@ -5,11 +5,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run mkdir build
       - uses: Timmy/plantuml-action@v1
         with:          
-          args: "k8s-for-devs-simplified.plantuml -tsvg"
-      - name: Upload svg file
-        uses: actions/upload-artifact@v2
+          args: "k8s-for-devs-simplified.plantuml -tsvg -o build"
+      # - name: Upload svg file to artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: svg-file
+      #     path: k8s-for-devs-simplified.svg
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          name: svg-file
-          path: k8s-for-devs-simplified.svg
+          branch: gh-pages
+          folder: build
