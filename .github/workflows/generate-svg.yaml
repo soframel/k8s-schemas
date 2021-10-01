@@ -5,7 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run mkdir build
+      - name: create output dir
+        run: mkdir build
       - uses: Timmy/plantuml-action@v1
         with:          
           args: "k8s-for-devs-simplified.plantuml -tsvg -o build"
