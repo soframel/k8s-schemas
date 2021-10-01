@@ -5,10 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: lokkju/github-action-plantuml@master
+      - uses: Timmy/plantuml-action@v1
         with:          
           args: "k8s-for-devs-simplified.plantuml -tsvg"
-          PLANTUML_VERSION: "1.2021.10"
       - name: Upload svg file
         uses: actions/upload-artifact@v2
         with:
