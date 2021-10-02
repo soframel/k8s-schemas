@@ -1,5 +1,8 @@
 name: generate-svg
-on: [push]
+on: 
+  push:
+    branches:
+      - main
 jobs:
   generate-svg:
     runs-on: ubuntu-latest
